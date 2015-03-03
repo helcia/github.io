@@ -1,0 +1,66 @@
+---
+title       : Developing Data Products Course Project
+subtitle    : The Relationship Between Diet and Chick Weight
+author      : Elaine Carson
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## The Goal
+### Create a working, interactive demonstration of a shiny application and a slide presentation describing the work using slidify.
+
+--- .class #id 
+
+## The Project
+### In this project the dataset, ChickWeights, which is found in the datasets library in r, was reshaped to allow calculation of the mean gain in weight of 21 day old chicks by each of four diets.  Shiny was used to set up a user interface that allows the user to select the diet and view the mean weight gain in grams of the 18 chick sample for the selected diet.  
+
+--- 
+### When weight gain for individual chicks is plotted, we can see a pattern. 
+```{r, echo=FALSE}
+library(datasets); data(ChickWeight); library(reshape2);library(dplyr);library(ggplot2)
+
+wideCW <- dcast(ChickWeight, Diet + Chick ~ Time, value.var = "weight")
+names(wideCW)[-(1 : 2)] <- paste("time", names(wideCW)[-(1 : 2)], sep = "")
+
+wideCW <- mutate(wideCW,
+                 gain = time21 - time0
+)
+
+meanGain<-aggregate(gain~Diet, data = wideCW,na.action = na.omit, mean)
+Chickwt<-wideCW[,c("Diet", "Chick", "gain")]
+Chickwt$Chick<-as.numeric(Chickwt$Chick)
+Chickwt<-na.omit(Chickwt)
+
+chickplot<-with(Chickwt, plot(Chick, gain,  main = "Mean Weight Gain by Chick"))
+with(subset(Chickwt, Diet == 1), points(Chick, gain, col = "blue"))
+with(subset(Chickwt, Diet == 2), points(Chick, gain, col = "red"))
+with(subset(Chickwt, Diet == 3), points(Chick, gain, col = "black"))
+with(subset(Chickwt, Diet == 4), points(Chick, gain, col = "green"))
+legend("topleft", pch = 1, col = c("blue", "red","black", "green"), legend = c("Diet 1", "Diet 2","Diet 3","Diet 4"))
+```
+
+--- 
+
+### Mean weight gain by Diet indicates there is a relationship between diet and weight gain. 
+```{r, echo=FALSE}
+library(datasets); data(ChickWeight); library(reshape2);library(dplyr);library(ggplot2)
+
+wideCW <- dcast(ChickWeight, Diet + Chick ~ Time, value.var = "weight")
+names(wideCW)[-(1 : 2)] <- paste("time", names(wideCW)[-(1 : 2)], sep = "")
+
+wideCW <- mutate(wideCW,
+                 gain = time21 - time0
+)
+
+meanGain<-aggregate(gain~Diet, data = wideCW,na.action = na.omit, mean)
+meanGain2<-as.data.frame(meanGain[,c("Diet", "gain")])
+meanGain2
+```
+### See the interactive shiny app 
+https://helcia.shinyapps.io/shinyapp/
+---
